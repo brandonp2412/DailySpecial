@@ -21,7 +21,7 @@ export const GET: RequestHandler = async ({ url }) => {
 export const POST: RequestHandler = async ({ request }) => {
   const data = await request.json();
   
-  if (!data.title || !data.status || !data.content) {
+  if (!data.title || !data.status || !data.author) {
     return json({ message: 'Missing required fields' }, { status: 400 });
   }
 

@@ -9,15 +9,17 @@
 
 	let article = $state({
 		title: '',
-		content: '',
-		status: 'draft' as 'draft' | 'published'
+		author: '',
+		status: 'draft' as 'draft' | 'published',
+		createdAt: ''
 	});
 
 	$effect(() => {
 		if (data.article) {
 			article.title = data.article.title;
-			article.content = data.article.content;
+			article.createdAt = data.article.createdAt;
 			article.status = data.article.status;
+			article.author = data.article.author;
 		}
 	});
 
@@ -31,11 +33,12 @@
 		try {
 			const url = isNew ? '/api/articles' : `/api/articles/${page.params.id}`;
 			const method = isNew ? 'POST' : 'PUT';
+			const createdAt = isNew ? new Date().toISOString() : article.createdAt;
 
 			const response = await fetch(url, {
 				method,
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(isNew ? article : { ...article, id: page.params.id })
+				body: JSON.stringify(isNew ? article : { ...article, id: page.params.id, createdAt })
 			});
 
 			if (!response.ok) {
@@ -89,17 +92,17 @@
 			</div>
 
 			<div class="form-group">
-				<label for="content">
-					<span class="label-text">Content</span>
+				<label for="title">
+					<span class="label-text">Author</span>
 					<span class="required">*</span>
 				</label>
-				<textarea
-					id="content"
-					placeholder="Write your article content here..."
-					bind:value={article.content}
-					rows="15"
+				<input
+					id="author"
+					type="text"
+					placeholder="Enter author name..."
+					bind:value={article.author}
 					required
-				></textarea>
+				/>
 			</div>
 
 			<div class="form-group">
@@ -238,7 +241,6 @@
 	}
 
 	input[type='text'],
-	textarea,
 	select {
 		padding: 0.875rem 1rem;
 		border: 2px solid #e2e8f0;
@@ -249,13 +251,7 @@
 		background: white;
 	}
 
-	textarea {
-		resize: vertical;
-		line-height: 1.6;
-	}
-
 	input:focus,
-	textarea:focus,
 	select:focus {
 		outline: none;
 		border-color: #667eea;

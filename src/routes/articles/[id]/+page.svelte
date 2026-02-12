@@ -33,12 +33,15 @@
 		try {
 			const url = isNew ? '/api/articles' : `/api/articles/${page.params.id}`;
 			const method = isNew ? 'POST' : 'PUT';
-			const createdAt = isNew ? new Date().toISOString() : article.createdAt;
 
 			const response = await fetch(url, {
 				method,
 				headers: { 'Content-Type': 'application/json' },
-				body: JSON.stringify(isNew ? article : { ...article, id: page.params.id, createdAt })
+				body: JSON.stringify(
+					isNew
+						? { ...article, createdAt: new Date().toISOString() }
+						: { ...article, id: page.params.id }
+				)
 			});
 
 			if (!response.ok) {
@@ -114,6 +117,10 @@
 					<option value="published">Published</option>
 				</select>
 			</div>
+
+			{#if !isNew}
+				<p class="subtitle">Created {article.createdAt}</p>
+			{/if}
 
 			<div class="form-actions">
 				<button type="button" class="btn-secondary" onclick={() => goto('/')}> Cancel </button>

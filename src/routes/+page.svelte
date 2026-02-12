@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { PageData } from './$types';
-	import { goto } from '$app/navigation';
+	import { goto, invalidateAll } from '$app/navigation';
 	import { page } from '$app/state';
 
 	let { data }: { data: PageData } = $props();
@@ -38,8 +38,27 @@
 </label>
 
 {#each data.articles as article}
-	<div>{article.title}</div>
+	<div>
+		{article.title}
+		<button onclick={() => goto(`/articles/${article.id}`)}>Edit</button>
+		<button
+			onclick={() => {
+				const ok = confirm(`Are you sure you want to delete ${article.title}?`);
+				if (ok) {
+					fetch(`/api/articles`, {
+						method: 'DELETE',
+						headers: { 'Content-Type': 'application/json' },
+						body: JSON.stringify({ id: article.id })
+					}).then(() => invalidateAll());
+				}
+			}}>Delete</button
+		>
+	</div>
 {/each}
+
+<div>
+	<button>Add article</button>
+</div>
 
 <div>
 	<button

@@ -34,3 +34,15 @@ export const POST: RequestHandler = async ({ request }) => {
 
   return json({ message: 'Article added successfully' });
 };
+
+export const DELETE: RequestHandler = async ({ request }) => {
+  const data = await request.json();
+  
+  if (!data.id) {
+    return json({ message: 'Missing required fields' }, { status: 400 });
+  }
+
+  articles = articles.filter(article => article.id !== data.id);
+
+  return json({ message: 'Article removed successfully' });
+};

@@ -1,11 +1,6 @@
 import { json, type RequestHandler } from "@sveltejs/kit";
 import type { Article } from "./article.model";
-
-let articles: Article[] = [
-  { id: 1, title: 'First Article', status: 'published', content: 'This is the first article.' },
-  { id: 2, title: 'Second Article', status: 'draft', content: 'This is the second article.' },
-  { id: 3, title: 'Third Article', status: 'published', content: 'This is the third article.' }
-];
+import { articles } from "./data";
 
 export const GET: RequestHandler = async ({ url }) => {
   const search = url.searchParams.get('search') || '';
@@ -42,7 +37,10 @@ export const DELETE: RequestHandler = async ({ request }) => {
     return json({ message: 'Missing required fields' }, { status: 400 });
   }
 
-  articles = articles.filter(article => article.id !== data.id);
+  const index = articles.findIndex(article => article.id === data.id);
+  if (index !== -1) {
+    articles.splice(index, 1);
+  }
 
   return json({ message: 'Article removed successfully' });
 };

@@ -113,9 +113,7 @@
 			</div>
 
 			<div class="form-actions">
-				<button type="button" class="btn-secondary" onclick={() => goto('/articles')}>
-					Cancel
-				</button>
+				<button type="button" class="btn-secondary" onclick={() => goto('/')}> Cancel </button>
 				<button type="submit" class="btn-primary" disabled={saving}>
 					{#if saving}
 						<span class="spinner"></span>

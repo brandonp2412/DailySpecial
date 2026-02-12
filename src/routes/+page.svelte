@@ -25,12 +25,17 @@
 	}
 </script>
 
-<input type="text" placeholder="Search..." bind:value={search} onchange={refresh} />
-<select onchange={refresh} bind:value={status}>
-	<option value=""></option>
-	<option value="published">Published</option>
-	<option value="draft">Draft</option>
-</select>
+<label
+	>Search<input type="text" placeholder="Search..." bind:value={search} onchange={refresh} /></label
+>
+<label
+	>Status
+	<select onchange={refresh} bind:value={status}>
+		<option value=""></option>
+		<option value="published">Published</option>
+		<option value="draft">Draft</option>
+	</select>
+</label>
 
 {#each data.articles as article}
 	<div>{article.title}</div>
@@ -55,5 +60,7 @@
 	>
 		Next page
 	</button>
-	<input type="number" placeholder="Limit" bind:value={limit} onchange={refresh} />
+	<label
+		>Limit<input type="number" placeholder="Limit" bind:value={limit} onchange={refresh} /></label
+	>
 </div>

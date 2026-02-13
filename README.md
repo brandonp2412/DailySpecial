@@ -13,6 +13,14 @@ npm run dev
 npm run dev -- --open
 ```
 
+## Testing
+
+To test DailySpecial, run:
+
+```sh
+npm run test
+```
+
 ## Building
 
 To create a production version of your app:

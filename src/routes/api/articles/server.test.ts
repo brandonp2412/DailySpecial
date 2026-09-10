@@ -65,6 +65,29 @@ describe('POST /api/articles', () => {
 
 		expect(articles.map((article) => article.id)).toEqual([1, 3, 4]);
 	});
+
+	it('returns 400 when the request body is malformed JSON', async () => {
+		const response = await POST({
+			request: { json: async () => Promise.reject(new SyntaxError('bad json')) }
+		} as any);
+		expect(response.status).toBe(400);
+		expect(await response.json()).toEqual({ message: 'Request body must be a JSON object' });
+		expect(articles).toHaveLength(3);
+	});
+
+	it.each([
+		null,
+		[],
+		{ title: 'New Article', author: 'Author 4', status: 'invalid', createdAt: '2024-01-04' },
+		{ title: 'New Article', author: 'Author 4', status: 'draft', createdAt: '' },
+		{ title: '   ', author: 'Author 4', status: 'draft', createdAt: '2024-01-04' }
+	])('rejects invalid article bodies: %j', async (body) => {
+		const response = await POST({
+			request: { json: async () => body }
+		} as any);
+		expect(response.status).toBe(400);
+		expect(articles).toHaveLength(3);
+	});
 });
 
 describe('DELETE /api/articles', () => {
@@ -84,7 +107,15 @@ describe('DELETE /api/articles', () => {
 		expect(articles.map((article) => article.id)).toEqual([1, 3]);
 	});
 
-	it.each([{}, { id: 0 }, { id: -1 }, { id: 'abc' }, { id: 1.5 }])(
+	it('returns 400 when the request body is malformed JSON', async () => {
+		const response = await DELETE({
+			request: { json: async () => Promise.reject(new SyntaxError('bad json')) }
+		} as any);
+		expect(response.status).toBe(400);
+		expect(articles).toHaveLength(3);
+	});
+
+	it.each([{}, null, [], { id: 0 }, { id: -1 }, { id: 'abc' }, { id: 1.5 }, { id: true }])(
 		'rejects an invalid id: %j',
 		async (body) => {
 			const response = await DELETE({

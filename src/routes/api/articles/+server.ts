@@ -1,5 +1,4 @@
 import { json, type RequestHandler } from '@sveltejs/kit';
-import type { Article } from './article.model';
 import { articles } from './data';
 
 export const GET: RequestHandler = async ({ url }) => {
@@ -25,7 +24,8 @@ export const POST: RequestHandler = async ({ request }) => {
 		return json({ message: 'Missing required fields' }, { status: 400 });
 	}
 
-	articles.push({ ...data, id: articles.length + 1 });
+	const nextId = articles.reduce((maxId, article) => Math.max(maxId, article.id), 0) + 1;
+	articles.push({ ...data, id: nextId });
 
 	return json({ message: 'Article added successfully' });
 };

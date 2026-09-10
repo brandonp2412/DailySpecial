@@ -7,10 +7,10 @@ export const load: PageLoad = async ({ fetch, params }) => {
 			article: null
 		};
 	}
-	
+
 	const response = await fetch(`/api/articles/${params.id}`);
 	const article = await response.json();
-	
+
 	return {
 		article: article as Article
 	};

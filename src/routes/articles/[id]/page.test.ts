@@ -8,407 +8,407 @@ const mockPageState = { params: { id: 'new' } };
 
 // Mock modules - vi.mock is hoisted so we define mocks inline
 vi.mock('$app/navigation', () => ({
-  goto: vi.fn(),
+	goto: vi.fn()
 }));
 
 vi.mock('$app/state', () => ({
-  get page() {
-    return mockPageState;
-  },
+	get page() {
+		return mockPageState;
+	}
 }));
 
 // Import the mocked modules
 import { goto } from '$app/navigation';
 
 describe('ArticleFormPage - Create Mode', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    global.fetch = vi.fn();
-    
-    // Set to create mode
-    mockPageState.params.id = 'new';
-  });
+	beforeEach(() => {
+		vi.clearAllMocks();
+		global.fetch = vi.fn();
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
+		// Set to create mode
+		mockPageState.params.id = 'new';
+	});
 
-  it('renders create form with correct title', async () => {
-    render(ArticleFormPage, {
-      props: {
-        data: { article: null },
-      },
-    });
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
 
-    expect(screen.getByText('Create New Article')).toBeInTheDocument();
-    expect(screen.getByText('Write your next masterpiece')).toBeInTheDocument();
-  });
+	it('renders create form with correct title', async () => {
+		render(ArticleFormPage, {
+			props: {
+				data: { article: null }
+			}
+		});
 
-  it('renders all form fields', async () => {
-    render(ArticleFormPage, {
-      props: {
-        data: { article: null },
-      },
-    });
+		expect(screen.getByText('Create New Article')).toBeInTheDocument();
+		expect(screen.getByText('Write your next masterpiece')).toBeInTheDocument();
+	});
 
-    expect(screen.getByLabelText(/Title/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Author/i)).toBeInTheDocument();
-    expect(screen.getByLabelText(/Status/i)).toBeInTheDocument();
-  });
+	it('renders all form fields', async () => {
+		render(ArticleFormPage, {
+			props: {
+				data: { article: null }
+			}
+		});
 
-  it('has default status as draft', async () => {
-    render(ArticleFormPage, {
-      props: {
-        data: { article: null },
-      },
-    });
+		expect(screen.getByLabelText(/Title/i)).toBeInTheDocument();
+		expect(screen.getByLabelText(/Author/i)).toBeInTheDocument();
+		expect(screen.getByLabelText(/Status/i)).toBeInTheDocument();
+	});
 
-    const statusSelect = screen.getByLabelText(/Status/i) as HTMLSelectElement;
-    expect(statusSelect.value).toBe('draft');
-  });
+	it('has default status as draft', async () => {
+		render(ArticleFormPage, {
+			props: {
+				data: { article: null }
+			}
+		});
 
-  it('validates required fields', async () => {
-    render(ArticleFormPage, {
-      props: {
-        data: { article: null },
-      },
-    });
+		const statusSelect = screen.getByLabelText(/Status/i) as HTMLSelectElement;
+		expect(statusSelect.value).toBe('draft');
+	});
 
-    const submitButton = screen.getByRole('button', { name: /Create Article/i });
-    await fireEvent.click(submitButton);
+	it('validates required fields', async () => {
+		render(ArticleFormPage, {
+			props: {
+				data: { article: null }
+			}
+		});
 
-    // HTML5 validation should prevent submission
-    const titleInput = screen.getByLabelText(/Title/i) as HTMLInputElement;
-    expect(titleInput.validity.valid).toBe(false);
-  });
+		const submitButton = screen.getByRole('button', { name: /Create Article/i });
+		await fireEvent.click(submitButton);
 
-  it('creates article with valid data', async () => {
-    const mockFetch = vi.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ id: 123 }),
-      })
-    ) as any;
-    global.fetch = mockFetch;
+		// HTML5 validation should prevent submission
+		const titleInput = screen.getByLabelText(/Title/i) as HTMLInputElement;
+		expect(titleInput.validity.valid).toBe(false);
+	});
 
-    render(ArticleFormPage, {
-      props: {
-        data: { article: null },
-      },
-    });
+	it('creates article with valid data', async () => {
+		const mockFetch = vi.fn(() =>
+			Promise.resolve({
+				ok: true,
+				json: () => Promise.resolve({ id: 123 })
+			})
+		) as any;
+		global.fetch = mockFetch;
 
-    const titleInput = screen.getByPlaceholderText(/Enter article title/i);
-    const authorInput = screen.getByPlaceholderText(/Enter author name/i);
-    const statusSelect = screen.getByLabelText(/Status/i);
+		render(ArticleFormPage, {
+			props: {
+				data: { article: null }
+			}
+		});
 
-    await fireEvent.input(titleInput, { target: { value: 'Test Article' } });
-    await fireEvent.input(authorInput, { target: { value: 'John Doe' } });
-    await fireEvent.change(statusSelect, { target: { value: 'published' } });
+		const titleInput = screen.getByPlaceholderText(/Enter article title/i);
+		const authorInput = screen.getByPlaceholderText(/Enter author name/i);
+		const statusSelect = screen.getByLabelText(/Status/i);
 
-    const submitButton = screen.getByRole('button', { name: /Create Article/i });
-    await fireEvent.click(submitButton);
+		await fireEvent.input(titleInput, { target: { value: 'Test Article' } });
+		await fireEvent.input(authorInput, { target: { value: 'John Doe' } });
+		await fireEvent.change(statusSelect, { target: { value: 'published' } });
 
-    await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith(
-        '/api/articles',
-        expect.objectContaining({
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: expect.stringContaining('Test Article'),
-        })
-      );
-    });
+		const submitButton = screen.getByRole('button', { name: /Create Article/i });
+		await fireEvent.click(submitButton);
 
-    expect(goto).toHaveBeenCalledWith('/');
-  });
+		await waitFor(() => {
+			expect(mockFetch).toHaveBeenCalledWith(
+				'/api/articles',
+				expect.objectContaining({
+					method: 'POST',
+					headers: { 'Content-Type': 'application/json' },
+					body: expect.stringContaining('Test Article')
+				})
+			);
+		});
 
-  it('displays error message on failed submission', async () => {
-    const mockFetch = vi.fn(() =>
-      Promise.resolve({
-        ok: false,
-        json: () => Promise.resolve({}),
-      })
-    ) as any;
-    global.fetch = mockFetch;
+		expect(goto).toHaveBeenCalledWith('/');
+	});
 
-    render(ArticleFormPage, {
-      props: {
-        data: { article: null },
-      },
-    });
+	it('displays error message on failed submission', async () => {
+		const mockFetch = vi.fn(() =>
+			Promise.resolve({
+				ok: false,
+				json: () => Promise.resolve({})
+			})
+		) as any;
+		global.fetch = mockFetch;
 
-    const titleInput = screen.getByPlaceholderText(/Enter article title/i);
-    const authorInput = screen.getByPlaceholderText(/Enter author name/i);
+		render(ArticleFormPage, {
+			props: {
+				data: { article: null }
+			}
+		});
 
-    await fireEvent.input(titleInput, { target: { value: 'Test Article' } });
-    await fireEvent.input(authorInput, { target: { value: 'John Doe' } });
+		const titleInput = screen.getByPlaceholderText(/Enter article title/i);
+		const authorInput = screen.getByPlaceholderText(/Enter author name/i);
 
-    const submitButton = screen.getByRole('button', { name: /Create Article/i });
-    await fireEvent.click(submitButton);
+		await fireEvent.input(titleInput, { target: { value: 'Test Article' } });
+		await fireEvent.input(authorInput, { target: { value: 'John Doe' } });
 
-    await waitFor(() => {
-      expect(screen.getByText(/Failed to save article/i)).toBeInTheDocument();
-    });
-  });
+		const submitButton = screen.getByRole('button', { name: /Create Article/i });
+		await fireEvent.click(submitButton);
 
-  it('disables submit button while saving', async () => {
-    const mockFetch = vi.fn(
-      () =>
-        new Promise((resolve) =>
-          setTimeout(() => resolve({ ok: true, json: () => Promise.resolve({}) }), 100)
-        )
-    ) as any;
-    global.fetch = mockFetch;
+		await waitFor(() => {
+			expect(screen.getByText(/Failed to save article/i)).toBeInTheDocument();
+		});
+	});
 
-    render(ArticleFormPage, {
-      props: {
-        data: { article: null },
-      },
-    });
+	it('disables submit button while saving', async () => {
+		const mockFetch = vi.fn(
+			() =>
+				new Promise((resolve) =>
+					setTimeout(() => resolve({ ok: true, json: () => Promise.resolve({}) }), 100)
+				)
+		) as any;
+		global.fetch = mockFetch;
 
-    const titleInput = screen.getByPlaceholderText(/Enter article title/i);
-    const authorInput = screen.getByPlaceholderText(/Enter author name/i);
+		render(ArticleFormPage, {
+			props: {
+				data: { article: null }
+			}
+		});
 
-    await fireEvent.input(titleInput, { target: { value: 'Test Article' } });
-    await fireEvent.input(authorInput, { target: { value: 'John Doe' } });
+		const titleInput = screen.getByPlaceholderText(/Enter article title/i);
+		const authorInput = screen.getByPlaceholderText(/Enter author name/i);
 
-    const submitButton = screen.getByRole('button', { name: /Create Article/i });
-    await fireEvent.click(submitButton);
+		await fireEvent.input(titleInput, { target: { value: 'Test Article' } });
+		await fireEvent.input(authorInput, { target: { value: 'John Doe' } });
 
-    expect(screen.getByText(/Saving.../i)).toBeInTheDocument();
-    expect(submitButton).toBeDisabled();
+		const submitButton = screen.getByRole('button', { name: /Create Article/i });
+		await fireEvent.click(submitButton);
 
-    await waitFor(() => {
-      expect(goto).toHaveBeenCalled();
-    });
-  });
+		expect(screen.getByText(/Saving.../i)).toBeInTheDocument();
+		expect(submitButton).toBeDisabled();
 
-  it('navigates back when cancel button is clicked', async () => {
-    render(ArticleFormPage, {
-      props: {
-        data: { article: null },
-      },
-    });
+		await waitFor(() => {
+			expect(goto).toHaveBeenCalled();
+		});
+	});
 
-    const cancelButton = screen.getByRole('button', { name: /Cancel/i });
-    await fireEvent.click(cancelButton);
+	it('navigates back when cancel button is clicked', async () => {
+		render(ArticleFormPage, {
+			props: {
+				data: { article: null }
+			}
+		});
 
-    expect(goto).toHaveBeenCalledWith('/');
-  });
+		const cancelButton = screen.getByRole('button', { name: /Cancel/i });
+		await fireEvent.click(cancelButton);
 
-  it('navigates back when back to articles button is clicked', async () => {
-    render(ArticleFormPage, {
-      props: {
-        data: { article: null },
-      },
-    });
+		expect(goto).toHaveBeenCalledWith('/');
+	});
 
-    const backButton = screen.getByRole('button', { name: /Back to Articles/i });
-    await fireEvent.click(backButton);
+	it('navigates back when back to articles button is clicked', async () => {
+		render(ArticleFormPage, {
+			props: {
+				data: { article: null }
+			}
+		});
 
-    expect(goto).toHaveBeenCalledWith('/');
-  });
+		const backButton = screen.getByRole('button', { name: /Back to Articles/i });
+		await fireEvent.click(backButton);
+
+		expect(goto).toHaveBeenCalledWith('/');
+	});
 });
 
 describe('ArticleFormPage - Edit Mode', () => {
-  const mockArticle = {
-    id: 123,
-    title: 'Existing Article',
-    author: 'Jane Smith',
-    status: 'published' as const,
-    createdAt: '2024-01-15T10:00:00Z',
-  };
+	const mockArticle = {
+		id: 123,
+		title: 'Existing Article',
+		author: 'Jane Smith',
+		status: 'published' as const,
+		createdAt: '2024-01-15T10:00:00Z'
+	};
 
-  beforeEach(() => {
-    vi.clearAllMocks();
-    global.fetch = vi.fn();
+	beforeEach(() => {
+		vi.clearAllMocks();
+		global.fetch = vi.fn();
 
-    // Set to edit mode
-    mockPageState.params.id = '123';
-  });
+		// Set to edit mode
+		mockPageState.params.id = '123';
+	});
 
-  afterEach(() => {
-    vi.restoreAllMocks();
-  });
+	afterEach(() => {
+		vi.restoreAllMocks();
+	});
 
-  it('renders edit form with correct title', async () => {
-    render(ArticleFormPage, {
-      props: {
-        data: { article: mockArticle },
-      },
-    });
+	it('renders edit form with correct title', async () => {
+		render(ArticleFormPage, {
+			props: {
+				data: { article: mockArticle }
+			}
+		});
 
-    expect(screen.getByText('Edit Article')).toBeInTheDocument();
-    expect(screen.getByText('Make your changes')).toBeInTheDocument();
-  });
+		expect(screen.getByText('Edit Article')).toBeInTheDocument();
+		expect(screen.getByText('Make your changes')).toBeInTheDocument();
+	});
 
-  it('populates form with existing article data', async () => {
-    render(ArticleFormPage, {
-      props: {
-        data: { article: mockArticle },
-      },
-    });
+	it('populates form with existing article data', async () => {
+		render(ArticleFormPage, {
+			props: {
+				data: { article: mockArticle }
+			}
+		});
 
-    const titleInput = screen.getByDisplayValue('Existing Article');
-    const authorInput = screen.getByDisplayValue('Jane Smith');
-    const statusSelect = screen.getByLabelText(/Status/i) as HTMLSelectElement;
+		const titleInput = screen.getByDisplayValue('Existing Article');
+		const authorInput = screen.getByDisplayValue('Jane Smith');
+		const statusSelect = screen.getByLabelText(/Status/i) as HTMLSelectElement;
 
-    expect(titleInput).toBeInTheDocument();
-    expect(authorInput).toBeInTheDocument();
-    expect(statusSelect.value).toBe('published');
-  });
+		expect(titleInput).toBeInTheDocument();
+		expect(authorInput).toBeInTheDocument();
+		expect(statusSelect.value).toBe('published');
+	});
 
-  it('displays creation date in edit mode', async () => {
-    render(ArticleFormPage, {
-      props: {
-        data: { article: mockArticle },
-      },
-    });
+	it('displays creation date in edit mode', async () => {
+		render(ArticleFormPage, {
+			props: {
+				data: { article: mockArticle }
+			}
+		});
 
-    expect(screen.getByText(/Created 2024-01-15T10:00:00Z/i)).toBeInTheDocument();
-  });
+		expect(screen.getByText(/Created 2024-01-15T10:00:00Z/i)).toBeInTheDocument();
+	});
 
-  it('updates article with modified data', async () => {
-    const mockFetch = vi.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({ id: 123 }),
-      })
-    ) as any;
-    global.fetch = mockFetch;
+	it('updates article with modified data', async () => {
+		const mockFetch = vi.fn(() =>
+			Promise.resolve({
+				ok: true,
+				json: () => Promise.resolve({ id: 123 })
+			})
+		) as any;
+		global.fetch = mockFetch;
 
-    render(ArticleFormPage, {
-      props: {
-        data: { article: mockArticle },
-      },
-    });
+		render(ArticleFormPage, {
+			props: {
+				data: { article: mockArticle }
+			}
+		});
 
-    const titleInput = screen.getByDisplayValue('Existing Article');
-    await fireEvent.input(titleInput, { target: { value: 'Updated Article' } });
+		const titleInput = screen.getByDisplayValue('Existing Article');
+		await fireEvent.input(titleInput, { target: { value: 'Updated Article' } });
 
-    const submitButton = screen.getByRole('button', { name: /Update Article/i });
-    await fireEvent.click(submitButton);
+		const submitButton = screen.getByRole('button', { name: /Update Article/i });
+		await fireEvent.click(submitButton);
 
-    await waitFor(() => {
-      expect(mockFetch).toHaveBeenCalledWith(
-        '/api/articles/123',
-        expect.objectContaining({
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: expect.stringContaining('Updated Article'),
-        })
-      );
-    });
+		await waitFor(() => {
+			expect(mockFetch).toHaveBeenCalledWith(
+				'/api/articles/123',
+				expect.objectContaining({
+					method: 'PUT',
+					headers: { 'Content-Type': 'application/json' },
+					body: expect.stringContaining('Updated Article')
+				})
+			);
+		});
 
-    expect(goto).toHaveBeenCalledWith('/');
-  });
+		expect(goto).toHaveBeenCalledWith('/');
+	});
 
-  it('shows correct button text in edit mode', async () => {
-    render(ArticleFormPage, {
-      props: {
-        data: { article: mockArticle },
-      },
-    });
+	it('shows correct button text in edit mode', async () => {
+		render(ArticleFormPage, {
+			props: {
+				data: { article: mockArticle }
+			}
+		});
 
-    expect(screen.getByRole('button', { name: /Update Article/i })).toBeInTheDocument();
-  });
+		expect(screen.getByRole('button', { name: /Update Article/i })).toBeInTheDocument();
+	});
 
-  it('allows changing status from published to draft', async () => {
-    const mockFetch = vi.fn(() =>
-      Promise.resolve({
-        ok: true,
-        json: () => Promise.resolve({}),
-      })
-    ) as any;
-    global.fetch = mockFetch;
+	it('allows changing status from published to draft', async () => {
+		const mockFetch = vi.fn(() =>
+			Promise.resolve({
+				ok: true,
+				json: () => Promise.resolve({})
+			})
+		) as any;
+		global.fetch = mockFetch;
 
-    render(ArticleFormPage, {
-      props: {
-        data: { article: mockArticle },
-      },
-    });
+		render(ArticleFormPage, {
+			props: {
+				data: { article: mockArticle }
+			}
+		});
 
-    const statusSelect = screen.getByLabelText(/Status/i);
-    await fireEvent.change(statusSelect, { target: { value: 'draft' } });
+		const statusSelect = screen.getByLabelText(/Status/i);
+		await fireEvent.change(statusSelect, { target: { value: 'draft' } });
 
-    const submitButton = screen.getByRole('button', { name: /Update Article/i });
-    await fireEvent.click(submitButton);
+		const submitButton = screen.getByRole('button', { name: /Update Article/i });
+		await fireEvent.click(submitButton);
 
-    await waitFor(() => {
-      const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
-      expect(callBody.status).toBe('draft');
-    });
-  });
+		await waitFor(() => {
+			const callBody = JSON.parse(mockFetch.mock.calls[0][1].body);
+			expect(callBody.status).toBe('draft');
+		});
+	});
 });
 
 describe('ArticleFormPage - Error Handling', () => {
-  beforeEach(() => {
-    vi.clearAllMocks();
-    
-    // Set to create mode
-    mockPageState.params.id = 'new';
-  });
+	beforeEach(() => {
+		vi.clearAllMocks();
 
-  it('handles network errors gracefully', async () => {
-    const mockFetch = vi.fn(() => Promise.reject(new Error('Network error'))) as any;
-    global.fetch = mockFetch;
+		// Set to create mode
+		mockPageState.params.id = 'new';
+	});
 
-    render(ArticleFormPage, {
-      props: {
-        data: { article: null },
-      },
-    });
+	it('handles network errors gracefully', async () => {
+		const mockFetch = vi.fn(() => Promise.reject(new Error('Network error'))) as any;
+		global.fetch = mockFetch;
 
-    const titleInput = screen.getByPlaceholderText(/Enter article title/i);
-    const authorInput = screen.getByPlaceholderText(/Enter author name/i);
+		render(ArticleFormPage, {
+			props: {
+				data: { article: null }
+			}
+		});
 
-    await fireEvent.input(titleInput, { target: { value: 'Test' } });
-    await fireEvent.input(authorInput, { target: { value: 'Author' } });
+		const titleInput = screen.getByPlaceholderText(/Enter article title/i);
+		const authorInput = screen.getByPlaceholderText(/Enter author name/i);
 
-    const submitButton = screen.getByRole('button', { name: /Create Article/i });
-    await fireEvent.click(submitButton);
+		await fireEvent.input(titleInput, { target: { value: 'Test' } });
+		await fireEvent.input(authorInput, { target: { value: 'Author' } });
 
-    await waitFor(() => {
-      expect(screen.getByText(/Network error/i)).toBeInTheDocument();
-    });
-  });
+		const submitButton = screen.getByRole('button', { name: /Create Article/i });
+		await fireEvent.click(submitButton);
 
-  it('clears error message on subsequent submission', async () => {
-    let shouldFail = true;
-    const mockFetch = vi.fn(() => {
-      if (shouldFail) {
-        return Promise.resolve({ ok: false });
-      }
-      return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
-    }) as any;
-    global.fetch = mockFetch;
+		await waitFor(() => {
+			expect(screen.getByText(/Network error/i)).toBeInTheDocument();
+		});
+	});
 
-    render(ArticleFormPage, {
-      props: {
-        data: { article: null },
-      },
-    });
+	it('clears error message on subsequent submission', async () => {
+		let shouldFail = true;
+		const mockFetch = vi.fn(() => {
+			if (shouldFail) {
+				return Promise.resolve({ ok: false });
+			}
+			return Promise.resolve({ ok: true, json: () => Promise.resolve({}) });
+		}) as any;
+		global.fetch = mockFetch;
 
-    const titleInput = screen.getByPlaceholderText(/Enter article title/i);
-    const authorInput = screen.getByPlaceholderText(/Enter author name/i);
+		render(ArticleFormPage, {
+			props: {
+				data: { article: null }
+			}
+		});
 
-    await fireEvent.input(titleInput, { target: { value: 'Test' } });
-    await fireEvent.input(authorInput, { target: { value: 'Author' } });
+		const titleInput = screen.getByPlaceholderText(/Enter article title/i);
+		const authorInput = screen.getByPlaceholderText(/Enter author name/i);
 
-    const submitButton = screen.getByRole('button', { name: /Create Article/i });
-    
-    // First submission fails
-    await fireEvent.click(submitButton);
-    await waitFor(() => {
-      expect(screen.getByText(/Failed to save article/i)).toBeInTheDocument();
-    });
+		await fireEvent.input(titleInput, { target: { value: 'Test' } });
+		await fireEvent.input(authorInput, { target: { value: 'Author' } });
 
-    // Second submission succeeds
-    shouldFail = false;
-    await fireEvent.click(submitButton);
-    
-    await waitFor(() => {
-      expect(screen.queryByText(/Failed to save article/i)).not.toBeInTheDocument();
-    });
-  });
+		const submitButton = screen.getByRole('button', { name: /Create Article/i });
+
+		// First submission fails
+		await fireEvent.click(submitButton);
+		await waitFor(() => {
+			expect(screen.getByText(/Failed to save article/i)).toBeInTheDocument();
+		});
+
+		// Second submission succeeds
+		shouldFail = false;
+		await fireEvent.click(submitButton);
+
+		await waitFor(() => {
+			expect(screen.queryByText(/Failed to save article/i)).not.toBeInTheDocument();
+		});
+	});
 });
